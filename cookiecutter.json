@@ -1,3 +1,5 @@
 {
-	"project_slug": "test_project"
+	"project_slug": "test_project",
+	"file_input": ["Yes", "No"],
+	"file_output": ["Yes", "No"]
 }

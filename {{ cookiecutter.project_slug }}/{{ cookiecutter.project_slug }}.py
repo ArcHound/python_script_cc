@@ -16,12 +16,16 @@ logging.basicConfig(
 
 
 @click.command()
+{%- if cookiecutter.file_input == "Yes" %}
 @click.option(
-    "--input-file", help="Input file", type=click.File("rt"), default=sys.stdin
+    "--input-file", help="Input file [default: STDIN]", type=click.File("rt"), default=sys.stdin
 )
+{%- endif %}
+{%- if cookiecutter.file_output == "Yes" %}
 @click.option(
-    "--output-file", help="Output file", type=click.File("at"), default=sys.stdout
+    "--output-file", help="Output file [default: STDOUT]", type=click.File("at"), default=sys.stdout
 )
+{%- endif %}
 @click.option(
     "--log-level",
     default="WARNING",
@@ -29,7 +33,14 @@ logging.basicConfig(
     show_default=True,
     help="Set logging level.",
 )
-def main(input_file, output_file, log_level):
+def main(
+{%- if cookiecutter.file_input == "Yes" %}
+        input_file, 
+{%- endif %}
+{%- if cookiecutter.file_output == "Yes" %}
+        output_file, 
+{%- endif %}
+        log_level):
     """Console script for {{cookiecutter.project_slug}}."""
     log_levels = {
         "DEBUG": logging.DEBUG,
@@ -39,11 +50,13 @@ def main(input_file, output_file, log_level):
         "CRITICAL": logging.CRITICAL,
     }
     logging.getLogger().setLevel(log_levels[log_level])
+{%- if cookiecutter.file_input == "Yes" %}
     if input_file.isatty():
         logging.critical("Input from stdin which is a tty - aborting")
         return 128
     with input_file:
         data = input_file.read()
+{%- endif %}
     return 0
 
 
