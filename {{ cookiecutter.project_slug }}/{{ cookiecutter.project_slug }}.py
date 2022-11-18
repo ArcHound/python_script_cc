@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import click
 from dotenv import load_dotenv
 import logging
