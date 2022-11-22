@@ -52,12 +52,15 @@ def main(
         "CRITICAL": logging.CRITICAL,
     }
     logging.getLogger().setLevel(log_levels[log_level])
+    # ======================================================================
+    #                        Your script starts here!
+    # ======================================================================
 {%- if cookiecutter.file_input == "Yes" %}
     if input_file.isatty():
         logging.critical("Input from stdin which is a tty - aborting")
         return 128
     with input_file:
-        data = input_file.read()
+        in_data = input_file.read()
 {%- endif %}
     return 0
 
