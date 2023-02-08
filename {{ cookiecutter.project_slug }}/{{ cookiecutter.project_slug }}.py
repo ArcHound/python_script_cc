@@ -15,7 +15,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[logging.StreamHandler()],
 )
-
+log = logging.getLogger(__name__)
 
 @click.command()
 {%- if cookiecutter.file_input == "Yes" %}
@@ -51,7 +51,7 @@ def main(
         "ERROR": logging.ERROR,
         "CRITICAL": logging.CRITICAL,
     }
-    logging.getLogger().setLevel(log_levels[log_level])
+    logging.getLogger(__name__).setLevel(log_levels[log_level])
     # ======================================================================
     #                        Your script starts here!
     # ======================================================================
@@ -66,4 +66,6 @@ def main(
 
 
 if __name__ == "__main__":
+    log.info("Starting...")
     main()
+    log.info("Finishing.")
