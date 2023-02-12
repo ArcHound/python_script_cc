@@ -7,6 +7,9 @@ import csv
 from dotenv import load_dotenv
 import logging
 import sys
+import time
+import datetime
+from functools import wraps
 
 load_dotenv()
 
@@ -17,6 +20,19 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+def log_time(func):
+    @wraps(func)
+    def log_time_wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        total_time = datetime.timedelta(seconds=end_time - start_time)
+        log.info(f"Function {func.__name__} took {str(total_time)}")
+        return result
+    return log_time_wrapper
+
+
+@log_time()
 @click.command()
 {%- if cookiecutter.file_input == "Yes" %}
 @click.option(
