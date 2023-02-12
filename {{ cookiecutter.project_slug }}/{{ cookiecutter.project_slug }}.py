@@ -20,7 +20,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-def log_time(func):
+def log_time(func): # TODO: fix using e.g. https://stackoverflow.com/questions/57773853/decorating-decorators-and-the-click-python-library
     @wraps(func)
     def log_time_wrapper(*args, **kwargs):
         start_time = time.perf_counter()
