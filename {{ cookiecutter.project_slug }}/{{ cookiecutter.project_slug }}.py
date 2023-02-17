@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
 
 import os
-import click
 import json
 import csv
-from dotenv import load_dotenv
 import logging
 import sys
+
+import click
+from dotenv import load_dotenv
+{%- if cookiecutter.use_requests == "Yes" %}
+import requests
+{%- endif %}
+{%- if cookiecutter.use_requests_cache == "Yes" %}
+import requests_cache
+
+requests_cache.install_cache(cache_name="{{ cookiecutter.requests_cache_name }}", backend="sqlite", expire_after=10800)
+{%- endif %}
 
 load_dotenv()
 

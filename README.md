@@ -6,7 +6,8 @@ To use simply run `cookiecutter gh:ArcHound/python_script_cc`. I recommend runni
 ## Features
 
  - load env vars from `.env` file,
- - accept stdin via pipe or use a file specified in an option (if you'd like),
- - return to stdout or to a file,
+ - accept `stdin` via pipe or use a file specified in an option (if you'd like),
+ - return to `stdout` or to a file,
  - option for logging verbosity level,
+ - option for including the `requests` lib and `requests_cache` lib
  - python gitignore from [https://github.com/github/gitignore/blob/main/Python.gitignore](https://github.com/github/gitignore/blob/main/Python.gitignore).
