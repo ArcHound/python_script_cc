@@ -37,12 +37,41 @@ log = logging.getLogger(__name__)
     "--output-file", help="Output file [default: STDOUT]", type=click.File("at"), default=sys.stdout
 )
 {%- endif %}
+{%- if cookiecutter.use_requests == "Yes" %}
+@click.option(
+    "--{{ cookiecutter.service_name }}-token",
+    type=str,
+    envvar="{{ cookiecutter.service_name|upper }}_TOKEN",
+    required=True,
+    help="Token for {{ cookiecutter.service_name }} API",
+)
+@click.option(
+    "--{{ cookiecutter.service_name }}-url",
+    type=str,
+    envvar="{{ cookiecutter.service_name|upper }}_URL",
+    default="{{ cookiecutter.service_url }}",
+    help="Base URL for {{ cookiecutter.service_name }}",
+)
+@click.option(
+    "--proxy",
+    is_flag=True,
+    help="Whether to use the proxy",
+    envvar="PROXY",
+)
+@click.option(
+    "--proxy-address",
+    default="http://localhost:8080",
+    help="Proxy address",
+    envvar="PROXY_ADDRESS",
+)
+{%- endif %}
 @click.option(
     "--log-level",
     default="WARNING",
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
     show_default=True,
     help="Set logging level.",
+    envvar="LOG_LEVEL"
 )
 def main(
 {%- if cookiecutter.file_input == "Yes" %}
@@ -50,6 +79,12 @@ def main(
 {%- endif %}
 {%- if cookiecutter.file_output == "Yes" %}
         output_file, 
+{%- endif %}
+{%- if cookiecutter.use_requests == "Yes" %}
+        {{ cookiecutter.service_name }}_token,
+        {{ cookiecutter.service_name }}_url,
+        proxy,
+        proxy_address,
 {%- endif %}
         log_level):
     """Console script for {{cookiecutter.project_slug}}."""
@@ -70,6 +105,19 @@ def main(
         return 128
     with input_file:
         in_data = input_file.read()
+
+{%- endif %}
+{%- if cookiecutter.use_requests == "Yes" %}
+    proxies = {"http": proxy_address, "https": proxy_address}
+
+    log.info("Init service session...")
+    {{ cookiecutter.service_name }}_session = requests.Session()
+    {{ cookiecutter.service_name }}_session.headers.update({"Authorization": "Bearer {}".format({{ cookiecutter.service_name }}_token)})
+    if proxy:
+        log.info("Got proxy {} for service {}".format(proxies, "{{ cookiecutter.service_name }}"))
+        {{ cookiecutter.service_name }}_session.proxies.update(proxies)
+        {{ cookiecutter.service_name }}_session.verify = False
+
 {%- endif %}
     return 0
 

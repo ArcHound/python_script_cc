@@ -4,5 +4,9 @@
 	"file_output": ["Yes", "No"],
 	"use_requests": ["Yes", "No"],
 	"use_requests_cache": ["Yes", "No"],
-	"requests_cache_name": "{{ cookiecutter.project_slug }}_requests_cache"
+	"requests_cache_name": "{{ cookiecutter.project_slug }}_requests_cache",
+	"service_name": "gitlab",
+	"service_url": "https://gitlab.com",
+	"service_token": "invalid"
 }
+
