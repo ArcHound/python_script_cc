@@ -5,6 +5,8 @@ import json
 import csv
 import logging
 import sys
+import time
+from functools import update_wrapper
 
 import click
 from dotenv import load_dotenv
@@ -25,6 +27,34 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 log = logging.getLogger(__name__)
+
+log_levels = {
+        "DEBUG": logging.DEBUG,
+        "INFO": logging.INFO,
+        "WARNING": logging.WARNING,
+        "ERROR": logging.ERROR,
+        "CRITICAL": logging.CRITICAL,
+}
+
+def log_decorator(f):
+    @click.pass_context
+    def new_func(ctx, *args, **kwargs):
+        log.setLevel(log_levels[ctx.params["log_level"]])
+        log.info("Starting")
+        r =  ctx.invoke(f,  *args, **kwargs)
+        log.info("Finishing")
+        return r
+    return update_wrapper(new_func, f)
+
+def time_decorator(f):
+    @click.pass_context
+    def new_func(ctx, *args, **kwargs):
+        t1 = time.perf_counter()
+        r =  ctx.invoke(f,  *args, **kwargs)
+        t2 = time.perf_counter()
+        log.info(f"Execution in {t2-t1:0.4f} seconds")
+        return r
+    return update_wrapper(new_func, f)
 
 @click.command()
 {%- if cookiecutter.file_input == "Yes" %}
@@ -73,6 +103,8 @@ log = logging.getLogger(__name__)
     help="Set logging level.",
     envvar="LOG_LEVEL"
 )
+@log_decorator
+@time_decorator
 def main(
 {%- if cookiecutter.file_input == "Yes" %}
         input_file, 
@@ -88,14 +120,6 @@ def main(
 {%- endif %}
         log_level):
     """Console script for {{cookiecutter.project_slug}}."""
-    log_levels = {
-        "DEBUG": logging.DEBUG,
-        "INFO": logging.INFO,
-        "WARNING": logging.WARNING,
-        "ERROR": logging.ERROR,
-        "CRITICAL": logging.CRITICAL,
-    }
-    logging.getLogger(__name__).setLevel(log_levels[log_level])
     # ======================================================================
     #                        Your script starts here!
     # ======================================================================
@@ -123,6 +147,4 @@ def main(
 
 
 if __name__ == "__main__":
-    log.info("Starting...")
     main()
-    log.info("Finishing.")

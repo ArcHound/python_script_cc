@@ -11,6 +11,7 @@ To use simply run `cookiecutter gh:ArcHound/python_script_cc`.
  - post gen hook to create virtual environment
  - return to `stdout` or to a file,
  - option for logging verbosity level,
+ - decorator for measuring time elapsed (log with informative severity)
  - option for including the `requests` lib and `requests_cache` lib,
     - few options for a default service - name, url and bearer token,
     - proxy options for requests session,
