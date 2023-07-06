@@ -6,6 +6,7 @@ import csv
 import logging
 import sys
 import time
+import math
 from functools import update_wrapper
 
 import click
@@ -28,6 +29,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+
 log_levels = {
         "DEBUG": logging.DEBUG,
         "INFO": logging.INFO,
@@ -35,6 +37,7 @@ log_levels = {
         "ERROR": logging.ERROR,
         "CRITICAL": logging.CRITICAL,
 }
+
 
 def log_decorator(f):
     @click.pass_context
@@ -44,17 +47,28 @@ def log_decorator(f):
         r =  ctx.invoke(f,  *args, **kwargs)
         log.info("Finishing")
         return r
+
     return update_wrapper(new_func, f)
+
 
 def time_decorator(f):
     @click.pass_context
     def new_func(ctx, *args, **kwargs):
         t1 = time.perf_counter()
-        r =  ctx.invoke(f,  *args, **kwargs)
-        t2 = time.perf_counter()
-        log.info(f"Execution in {t2-t1:0.4f} seconds")
-        return r
+        try:
+            r = ctx.invoke(f, *args, **kwargs)
+            return r
+        except Exception as e:
+            raise e
+        finally:
+            t2 = time.perf_counter()
+            mins = math.floor(t2-t1) // 60
+            hours = mins // 60
+            secs = (t2-t1) - 60 * mins - 3600 * hours
+            log.info(f"Execution in {hours:02d}:{mins:02d}:{secs:0.4f}")
+        
     return update_wrapper(new_func, f)
+
 
 @click.command()
 {%- if cookiecutter.file_input == "Yes" %}
