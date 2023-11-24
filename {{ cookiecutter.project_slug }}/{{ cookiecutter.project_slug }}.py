@@ -133,14 +133,6 @@ def profile_decorator(f):
     envvar="PROXY_ADDRESS",
 )
 {%- endif %}
-@click.option(
-    "--log-level",
-    default="WARNING",
-    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
-    show_default=True,
-    help="Set logging level.",
-    envvar="LOG_LEVEL"
-)
 {%- if cookiecutter.profiling == "Yes" %}
 @click.option(
     "--profiling",
@@ -180,6 +172,14 @@ def profile_decorator(f):
     show_default=True,
 )
 {%- endif %}
+@click.option(
+    "--log-level",
+    default="WARNING",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
+    show_default=True,
+    help="Set logging level.",
+    envvar="LOG_LEVEL"
+)
 @log_decorator
 @time_decorator
 {%- if cookiecutter.profiling == "Yes" %}
@@ -197,6 +197,11 @@ def main(
         {{ cookiecutter.service_name }}_url,
         proxy,
         proxy_address,
+{%- endif %}
+{%- if cookiecutter.profiling == "Yes" %}
+        profiling,
+        profiling_file,
+        profiling_sort_key,
 {%- endif %}
         log_level):
     """Console script for {{cookiecutter.project_slug}}."""
