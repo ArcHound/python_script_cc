@@ -73,12 +73,18 @@ def time_decorator(f):
 @click.command()
 {%- if cookiecutter.file_input == "Yes" %}
 @click.option(
-    "--input-file", help="Input file [default: STDIN]", type=click.File("rt"), default=sys.stdin
+    "--input-file",
+    help="Input file [default: STDIN]",
+    type=click.Path(readable=True, file_okay=True, dir_okay=False),
+    default="-",
 )
 {%- endif %}
 {%- if cookiecutter.file_output == "Yes" %}
 @click.option(
-    "--output-file", help="Output file [default: STDOUT]", type=click.File("at"), default=sys.stdout
+    "--output-file",
+    help="Output file [default: STDOUT]",
+    type=click.Path(readable=True, file_okay=True, dir_okay=False),
+    default="-",
 )
 {%- endif %}
 {%- if cookiecutter.use_requests == "Yes" %}
@@ -138,11 +144,11 @@ def main(
     #                        Your script starts here!
     # ======================================================================
 {%- if cookiecutter.file_input == "Yes" %}
-    if input_file.isatty():
+    if input_file == "-" and sys.stdin.isatty():
         logging.critical("Input from stdin which is a tty - aborting")
         return 128
-    with input_file:
-        in_data = input_file.read()
+    with click.open_file(input_file, "r") as f:
+        in_data = f.read()
 
 {%- endif %}
 {%- if cookiecutter.use_requests == "Yes" %}
@@ -156,6 +162,10 @@ def main(
         {{ cookiecutter.service_name }}_session.proxies.update(proxies)
         {{ cookiecutter.service_name }}_session.verify = False
 
+{%- endif %}
+{%- if cookiecutter.file_output == "Yes" %}
+    with click.open_file(output_file, "w") as f:
+        f.write("Hello, world!")
 {%- endif %}
     return 0
 
