@@ -7,6 +7,7 @@
 	"requests_cache_name": "{{ cookiecutter.project_slug }}_requests_cache",
 	"service_name": "gitlab",
 	"service_url": "https://gitlab.com",
-	"service_token": "invalid"
+	"service_token": "invalid",
+	"profiling": ["Yes", "No"]
 }
 

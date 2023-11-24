@@ -69,6 +69,24 @@ def time_decorator(f):
         
     return update_wrapper(new_func, f)
 
+{%- if cookiecutter.profiling == "Yes" %}
+def profile_decorator(f):
+    @click.pass_context
+    def new_func(ctx, *args, **kwargs):
+        if ctx.params["profiling"]:
+            with cProfile.Profile() as profile:
+                r = ctx.invoke(f, *args, **kwargs)
+                with open(ctx.params["profiling_file"], "w") as sfs:
+                    pstats.Stats(profile, stream=sfs).strip_dirs().sort_stats(
+                        ctx.params["profiling_sort_key"]
+                    ).print_stats()
+                return r
+        else:
+            r = ctx.invoke(f, *args, **kwargs)
+            return r
+
+    return update_wrapper(new_func, f)
+{%- endif %}
 
 @click.command()
 {%- if cookiecutter.file_input == "Yes" %}
@@ -123,8 +141,50 @@ def time_decorator(f):
     help="Set logging level.",
     envvar="LOG_LEVEL"
 )
+{%- if cookiecutter.profiling == "Yes" %}
+@click.option(
+    "--profiling",
+    default=False,
+    is_flag=True,
+    help="Profile the program - get performance data",
+)
+@click.option(
+    "--profiling-file",
+    help="Profiling output file",
+    type=click.Path(writable=True, file_okay=True, dir_okay=False),
+    default=f"/tmp/{{cookiecutter.project_slug}}_profile.log",
+    show_default=True,
+)
+@click.option(
+    "--profiling-sort-key",
+    help="Profiling sort key",
+    type=click.Choice(
+        [
+            "calls",
+            "cumulative",
+            "cumtime",
+            "file",
+            "filename",
+            "module",
+            "ncalls",
+            "pcalls",
+            "line",
+            "name",
+            "nfl",
+            "stdname",
+            "time",
+            "tottime",
+        ]
+    ),
+    default="cumulative",
+    show_default=True,
+)
+{%- endif %}
 @log_decorator
 @time_decorator
+{%- if cookiecutter.profiling == "Yes" %}
+@profile_decorator
+{%- endif %}
 def main(
 {%- if cookiecutter.file_input == "Yes" %}
         input_file, 
