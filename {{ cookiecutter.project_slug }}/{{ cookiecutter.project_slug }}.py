@@ -8,6 +8,8 @@ import sys
 import time
 import math
 from functools import update_wrapper
+import cProfile
+import pstats
 
 import click
 from dotenv import load_dotenv
@@ -69,6 +71,7 @@ def time_decorator(f):
         
     return update_wrapper(new_func, f)
 
+
 {%- if cookiecutter.profiling == "Yes" %}
 def profile_decorator(f):
     @click.pass_context
@@ -87,6 +90,7 @@ def profile_decorator(f):
 
     return update_wrapper(new_func, f)
 {%- endif %}
+
 
 @click.command()
 {%- if cookiecutter.file_input == "Yes" %}
