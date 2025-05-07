@@ -31,7 +31,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[logging.StreamHandler()],
 )
-log = logging.getLogger({{ cookiecutter.project_slug }})
+log = logging.getLogger("{{ cookiecutter.project_slug }}")
 
 
 log_levels = {
