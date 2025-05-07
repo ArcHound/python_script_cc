@@ -93,7 +93,7 @@ def profile_decorator(f):
     return update_wrapper(new_func, f)
 {%- endif %}
 
-@click.command()
+@click.group()
 def cli():
     """Console script for {{cookiecutter.project_slug}}."""
     pass
