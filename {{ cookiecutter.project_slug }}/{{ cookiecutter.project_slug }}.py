@@ -8,8 +8,10 @@ import sys
 import time
 import math
 from functools import update_wrapper
+{%- if cookiecutter.profiling == "Yes" %}
 import cProfile
 import pstats
+{%- endif %}
 
 import click
 from dotenv import load_dotenv
@@ -29,7 +31,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[logging.StreamHandler()],
 )
-log = logging.getLogger(__name__)
+log = logging.getLogger({{ cookiecutter.project_slug }})
 
 
 log_levels = {
@@ -91,8 +93,12 @@ def profile_decorator(f):
     return update_wrapper(new_func, f)
 {%- endif %}
 
-
 @click.command()
+def cli():
+    """Console script for {{cookiecutter.project_slug}}."""
+    pass
+
+@cli.command()
 {%- if cookiecutter.file_input == "Yes" %}
 @click.option(
     "--input-file",
@@ -237,7 +243,10 @@ def main(
         f.write("Hello, world!")
 {%- endif %}
     return 0
+    # ======================================================================
+    #                        Your script ends here!
+    # ======================================================================
 
 
 if __name__ == "__main__":
-    main()
+    cli()

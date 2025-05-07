@@ -1,6 +1,5 @@
 #!/bin/bash
 
-python3 -m venv venv
-source venv/bin/activate
-pip3 install -r requirements.txt
-chmod +x "{{ cookiecutter.project_slug }}.py"
+uv init
+rm hello.py
+uv add -r requirements.txt
