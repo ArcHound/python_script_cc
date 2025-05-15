@@ -46,7 +46,7 @@ log_levels = {
 def log_decorator(f):
     @click.pass_context
     def new_func(ctx, *args, **kwargs):
-        if ctx.params["log_level"]:
+        if ctx.params.get("log_level", False):
             ctx.obj["log_level"] = ctx.params["log_level"]
         log.setLevel(log_levels[ctx.obj["log_level"]])
         r =  ctx.invoke(f,  *args, **kwargs)
@@ -80,7 +80,7 @@ def time_decorator(f):
 def profile_decorator(f):
     @click.pass_context
     def new_func(ctx, *args, **kwargs):
-        if ctx.params["profiling"]:
+        if ctx.params.get("profiling", False):
             ctx.obj["profiling"] = ctx.params["profiling"]
             ctx.obj["profiling_file"] = ctx.params["profiling_file"]
             ctx.obj["profiling_sort_key"] = ctx.params["profiling_sort_key"]
