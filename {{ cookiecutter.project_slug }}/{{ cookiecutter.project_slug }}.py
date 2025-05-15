@@ -46,10 +46,10 @@ log_levels = {
 def log_decorator(f):
     @click.pass_context
     def new_func(ctx, *args, **kwargs):
-        log.setLevel(log_levels[ctx.params["log_level"]])
-        log.info("Starting")
+        if ctx.params["log_level"]:
+            ctx.obj["log_level"] = ctx.params["log_level"]
+        log.setLevel(log_levels[ctx.obj["log_level"]])
         r =  ctx.invoke(f,  *args, **kwargs)
-        log.info("Finishing")
         return r
 
     return update_wrapper(new_func, f)
@@ -60,11 +60,13 @@ def time_decorator(f):
     def new_func(ctx, *args, **kwargs):
         t1 = time.perf_counter()
         try:
+            log.info("Starting")
             r = ctx.invoke(f, *args, **kwargs)
             return r
         except Exception as e:
             raise e
         finally:
+            log.info("Finishing")
             t2 = time.perf_counter()
             mins = math.floor(t2-t1) // 60
             hours = mins // 60
@@ -79,11 +81,15 @@ def profile_decorator(f):
     @click.pass_context
     def new_func(ctx, *args, **kwargs):
         if ctx.params["profiling"]:
+            ctx.obj["profiling"] = ctx.params["profiling"]
+            ctx.obj["profiling_file"] = ctx.params["profiling_file"]
+            ctx.obj["profiling_sort_key"] = ctx.params["profiling_sort_key"]
+        if ctx.obj.get("profiling", False):
             with cProfile.Profile() as profile:
                 r = ctx.invoke(f, *args, **kwargs)
-                with open(ctx.params["profiling_file"], "w") as sfs:
+                with open(ctx.obj["profiling_file"], "w") as sfs:
                     pstats.Stats(profile, stream=sfs).strip_dirs().sort_stats(
-                        ctx.params["profiling_sort_key"]
+                        ctx.obj["profiling_sort_key"]
                     ).print_stats()
                 return r
         else:
@@ -94,7 +100,63 @@ def profile_decorator(f):
 {%- endif %}
 
 @click.group()
-def cli():
+{%- if cookiecutter.profiling == "Yes" %}
+@click.option(
+    "--profiling",
+    default=False,
+    is_flag=True,
+    help="Profile the program - get performance data",
+)
+@click.option(
+    "--profiling-file",
+    help="Profiling output file",
+    type=click.Path(writable=True, file_okay=True, dir_okay=False),
+    default=f"/tmp/{{cookiecutter.project_slug}}_profile.log",
+    show_default=True,
+)
+@click.option(
+    "--profiling-sort-key",
+    help="Profiling sort key",
+    type=click.Choice(
+        [
+            "calls",
+            "cumulative",
+            "cumtime",
+            "file",
+            "filename",
+            "module",
+            "ncalls",
+            "pcalls",
+            "line",
+            "name",
+            "nfl",
+            "stdname",
+            "time",
+            "tottime",
+        ]
+    ),
+    default="cumulative",
+    show_default=True,
+)
+{%- endif %}
+@click.option(
+    "--log-level",
+    default="WARNING",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
+    show_default=True,
+    help="Set logging level.",
+    envvar="LOG_LEVEL"
+)
+{%- if cookiecutter.profiling == "Yes" %}
+@profile_decorator
+{%- endif %}
+@log_decorator
+def cli({%- if cookiecutter.profiling == "Yes" %}
+        profiling,
+        profiling_file,
+        profiling_sort_key,
+{%- endif %}
+        log_level):
     """Console script for {{cookiecutter.project_slug}}."""
     pass
 
@@ -143,58 +205,12 @@ def cli():
     envvar="PROXY_ADDRESS",
 )
 {%- endif %}
-{%- if cookiecutter.profiling == "Yes" %}
-@click.option(
-    "--profiling",
-    default=False,
-    is_flag=True,
-    help="Profile the program - get performance data",
-)
-@click.option(
-    "--profiling-file",
-    help="Profiling output file",
-    type=click.Path(writable=True, file_okay=True, dir_okay=False),
-    default=f"/tmp/{{cookiecutter.project_slug}}_profile.log",
-    show_default=True,
-)
-@click.option(
-    "--profiling-sort-key",
-    help="Profiling sort key",
-    type=click.Choice(
-        [
-            "calls",
-            "cumulative",
-            "cumtime",
-            "file",
-            "filename",
-            "module",
-            "ncalls",
-            "pcalls",
-            "line",
-            "name",
-            "nfl",
-            "stdname",
-            "time",
-            "tottime",
-        ]
-    ),
-    default="cumulative",
-    show_default=True,
-)
-{%- endif %}
-@click.option(
-    "--log-level",
-    default="WARNING",
-    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
-    show_default=True,
-    help="Set logging level.",
-    envvar="LOG_LEVEL"
-)
 @log_decorator
 @time_decorator
 {%- if cookiecutter.profiling == "Yes" %}
 @profile_decorator
 {%- endif %}
+@click.pass_context
 def main(
 {%- if cookiecutter.file_input == "Yes" %}
         input_file, 
@@ -208,12 +224,7 @@ def main(
         proxy,
         proxy_address,
 {%- endif %}
-{%- if cookiecutter.profiling == "Yes" %}
-        profiling,
-        profiling_file,
-        profiling_sort_key,
-{%- endif %}
-        log_level):
+):
     """Console script for {{cookiecutter.project_slug}}."""
     # ======================================================================
     #                        Your script starts here!
@@ -249,4 +260,4 @@ def main(
 
 
 if __name__ == "__main__":
-    cli()
+    cli(obj={})
