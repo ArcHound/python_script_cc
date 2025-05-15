@@ -211,7 +211,7 @@ def cli({%- if cookiecutter.profiling == "Yes" %}
 @profile_decorator
 {%- endif %}
 @click.pass_context
-def main(
+def main(ctx,
 {%- if cookiecutter.file_input == "Yes" %}
         input_file, 
 {%- endif %}
